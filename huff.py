@@ -8,12 +8,26 @@
 #	instructions, run "huff.py --help" or "huff.py -h"
 #
 # Seth Cattanach, scattanach1@gmail.com
-# LAST UPDATED: 25 June 2020
+# LAST UPDATED: 07 July 2020
 # ---------------------------------------------------------------------------
 
 # import statements
 import sys
-import os
+import pickle
+
+
+# ---------------------------------------------------------------------------
+# yield_encoding" recursive function parses priority queue until leaf node
+#	encountered, at which point it returns the encoding for a given char
+# ---------------------------------------------------------------------------
+'''
+def yield_encoding(data):
+	if data[2] is None:
+		yield 
+	else:
+		yield 
+'''
+
 
 
 # ---------------------------------------------------------------------------
@@ -23,10 +37,47 @@ import os
 # 
 #	Returns: TODO
 # ---------------------------------------------------------------------------
-def encode(f, custom=False):
+def encode(fil, enc, ver, opt):
+	# if opt specified, optimize encoding using custom freq distribution
+	freqs = {}
+	base = []
+	with open(fil, mode='r', encoding=enc) as f:
+		for line in f.readlines():
+			for char in line:
+				if char in freqs.keys():
+					freqs[char] += 1
+				else:
+					freqs[char] = 1
+		# sort dict by value, low-to-high, return list of tuples
+		# "None" denotes leaf node
+		freqs = sorted(freqs.items(), reverse=False, key=lambda x: x[1])
+		base = [(item[0], item[1], None) for item in freqs]
+		len_charset = len(base)
+
+
+	# build Huffman encoding tree as a "priority queue"
+	# (implemented as a list of compound tuples)
+	while len(base) > 1:
+		# replace first index with new, compound node
+		base[0] = (base[0][0] + base[1][0], base[0][1] + base[1][1], (base[0], base[1]))
+		# remove second index
+		base.pop(1)
+		# re-sort all items in "base" (based on cumulative counts)
+		base = sorted(base, reverse=False, key=lambda x: x[1])
+
+	# assign encoding based on priority queue nodes
+	print(base)
+
+
+
+
+def decode(fil, enc, ver, opt):
 	return True		# TODO
 
+
+# ---------------------------------------------------------------------------
 # display_usage function displays usage instructions for command-line use
+# ---------------------------------------------------------------------------
 def display_usage():
 	print('\n\t' + "USAGE: python huff.py [OPTIONS]")
 	print('\t' + ''.join('=' for i in range(90)))
@@ -45,17 +96,19 @@ def display_usage():
 	print()
 
 
+
+# ---------------------------------------------------------------------------
 # main execution
+# ---------------------------------------------------------------------------
 def main():
+
 	# initialize default program parameters
-	input_encoding = "utf-8"
+	input_encoding = "ascii"
 	optimize = False
 	verbose = False
 
-
-
 	# read command line arguments
-	if len(sys.argv) < 2 or (len(sys.argv) >= 2 and '-h' in sys.argv):
+	if len(sys.argv) < 2 or (len(sys.argv) >= 2 and ('-h' in sys.argv or '--help' in sys.argv)):
 		display_usage()
 		exit(1)
 	if '-c' not in sys.argv and '-d' not in sys.argv:
@@ -110,16 +163,20 @@ def main():
 				exit(1)
 			else:
 				input_encoding = sys.argv[i+1]
+				if input_encoding == 'utf-8':
+					input_encoding = 'utf-8-sig'
+
+	# call "encode" or "decode" as needed
+	if mode == 'c':
+		encode(input_file, input_encoding, verbose, optimize)
+	elif mode == 'd':
+		decode(input_file, input_encoding, verbose, optimize)
+
+	exit(0)
 
 
-	# debug print program parameters
-	print("usage params:")
-	print("encoding: " + input_encoding)
-	print("optimize:", optimize)
-	print("verbose:", verbose)
-	print("file: " + input_file)
-
-
+# ---------------------------------------------------------------------------
 # main function handler
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
 	main()
