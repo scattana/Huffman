@@ -50,9 +50,9 @@ def encode(fil, enc, ver, opt):
 					freqs[char] = 1
 		# sort dict by value, low-to-high, return list of tuples
 		# "None" denotes leaf node
+		charset = freqs.keys()
 		freqs = sorted(freqs.items(), reverse=False, key=lambda x: x[1])
 		base = [(item[0], item[1], None) for item in freqs]
-		len_charset = len(base)
 
 
 	# build Huffman encoding tree as a "priority queue"
@@ -67,8 +67,18 @@ def encode(fil, enc, ver, opt):
 
 	# assign encoding based on priority queue nodes
 	print(base)
-
-
+	encoding_map = {}
+	for c in charset:
+		temp = base[0]
+		encoding_map[c] = ''
+		while len(temp[0]) > 1:
+			if c in temp[2][0][0]:
+				encoding_map[c] += '0'
+				temp = temp[2][0]
+			else:
+				encoding_map[c] += '1'
+				temp = temp[2][1]
+	print(encoding_map)
 
 
 def decode(fil, enc, ver, opt):
@@ -84,8 +94,8 @@ def display_usage():
 	print("\t{: <20} {: <40}".format("-h", "Display usage instructions"))
 	print("\t{: <20} {: <40}".format("-c [file]", "Compress/encode usage mode (-c or -d is required)"))
 	print("\t{: <20} {: <40}".format("-d [file]", "Decompress/decode usage mode (-c or -d is required)"))
-	print("\t{: <20} {: <40}".format("-g", "Use global encoding (default). Specify -o to use optimized encoding"))
-	print("\t{: <20} {: <40}".format("-o", "Optimize compression with file-specific character encoding"))
+	print("\t{: <20} {: <40}".format("-o", "Optimize compression with file-specific character encoding (DEFAULT)"))
+	print("\t{: <20} {: <40}".format("-g", "Use global encoding (faster, but less efficient)"))
 	print("\t{: <20} {: <40}".format("-e [encoding]", "Specify input text file encoding. Default is utf-8"))
 	print("\t{: <20} {: <40}".format("-v", "Verbose program output"))
 	print('\n')
