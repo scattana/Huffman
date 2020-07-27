@@ -17,17 +17,12 @@ import pickle
 
 
 # ---------------------------------------------------------------------------
-# yield_encoding" recursive function parses priority queue until leaf node
-#	encountered, at which point it returns the encoding for a given char
+# "compress" function takes an encoding map as a dictionary + input file
+#	outputs a compressed file written to current working directory
+#	(compressed file ends with .huff extension)
 # ---------------------------------------------------------------------------
-'''
-def yield_encoding(data):
-	if data[2] is None:
-		yield 
-	else:
-		yield 
-'''
-
+#def compress(f, e):
+	
 
 
 # ---------------------------------------------------------------------------
@@ -80,6 +75,13 @@ def encode(fil, enc, ver, opt):
 				temp = temp[2][1]
 	print(encoding_map)
 
+	# process write-to-file with fil and encoding_map
+	if compress(fil, encoding_map):
+		return True
+	else:
+		return False
+
+
 
 def decode(fil, enc, ver, opt):
 	return True		# TODO
@@ -102,7 +104,7 @@ def display_usage():
 	print("\tThanks for using the Huffman text compressor!\n\tWe currently support the following character encodings:")
 	print('\t' + ''.join('=' for i in range(60)))
 	with open("supported_encoding_types.txt", "r") as f:
-		print('\n'.join(['\t>> ' + line for line in f.readlines()]))
+		print(''.join(['\t>> ' + line for line in f.readlines()]))
 	print()
 
 
@@ -178,7 +180,11 @@ def main():
 
 	# call "encode" or "decode" as needed
 	if mode == 'c':
-		encode(input_file, input_encoding, verbose, optimize)
+		if encode(input_file, input_encoding, verbose, optimize):
+			print("Compressed file written successfully")
+			exit(0)
+		else:
+			print("FATAL ERROR:", file=sys.stderr)
 	elif mode == 'd':
 		decode(input_file, input_encoding, verbose, optimize)
 
